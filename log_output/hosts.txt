@@ -1,0 +1,10 @@
+pcmas.it.bton.ac.uk,353
+edams.ksc.nasa.gov,232
+poppy.hensa.ac.uk,207
+mnssec3.dukepower.com,144
+stella.uio.no,143
+trusty.lmsc.lockheed.com,132
+163.205.156.16,119
+scooter.pa-x.dec.com,113
+vagrant.vf.mmc.com,110
+proxy.bellatlantic.com,109

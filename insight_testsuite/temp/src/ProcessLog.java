@@ -15,11 +15,11 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
- * 
- * @author veryfat
+ * Process the log of fansite
+ * Implement the generation of hosts, resources, hours, blocked features.
+ * @author Y.L
  *
  */
-
 public class ProcessLog {
 	private static SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss");
 	
@@ -35,55 +35,50 @@ public class ProcessLog {
 		BufferedWriter out2 = new BufferedWriter(new FileWriter(RESOURCES));
 		BufferedWriter out3 = new BufferedWriter(new FileWriter(HOURS));
 		BufferedWriter out4 = new BufferedWriter(new FileWriter(BLOCKED));
-
-		Map<String, Host> hostMap = new HashMap<>();
-		Map<String, Resource> resourceMap = new HashMap<>();
 		
+		/** Store the hosts info */
+		Map<String, Host> hostMap = new HashMap<>();
+		/** Store the resources info */
+		Map<String, Resource> resourceMap = new HashMap<>();
+		/** Store the hours info of start time within 60 minutes*/
 		LinkedList<HourRecord> hourRecords = new LinkedList<>();
+		/** Min heap for keeping track of current top 10 busiest hours */
 		PriorityQueue<HourRecord> buiestRecord = new PriorityQueue<>();
 		
+		/** Initialize with first record*/
 		String line = bf.readLine();
 		String timezone = line.split("\\s+")[4].replaceFirst("\\]", "");
 		Date startTime = format.parse(line.split("\\s+")[3].replaceFirst("\\[", ""));
 		hourRecords.add(new HourRecord(startTime));
 		
-		Date currentTime = new Date();
+		int lineCount = 0;
 		
+		/** Process the log line by line*/
 		while(line != null) {
 			try {
 				
-				/**
-				 *  Parse the line of log
-				 */
+				/** Parse the line of log  */
 				String[] lineSplit = line.split("\\s+");
 				String hostName = lineSplit[0];
 				Date time = format.parse(lineSplit[3].replaceFirst("\\[", ""));
 				String resourcePath = lineSplit[6].replace("\"", "");
 				
-	//			if (lineSplit.length != 10 && lineSplit.length != 9) {
-	//				System.out.println(lineSplit.length + " " + line);
-	//			}
-				
-				if (time.getDate() != currentTime.getDate()) {
-					currentTime = time;
-					System.out.println("Current Process to: " + lineSplit[3].replaceFirst("\\[", ""));
+				/** Track current processing progress*/
+				if (lineCount++ % 200000 == 0) {
+					System.out.println("Now processing to: " + lineSplit[3].replaceFirst("\\[", ""));
 				}
 				
-				/**
-				 * Add new host or update the attempt times
-				 */
+				/** Add new host or update the attempt times */
 				Host host;			
 				if (!hostMap.containsKey(hostName)) {
-					host = new Host(hostName, 1);
+					host = new Host(hostName);
 					hostMap.put(hostName, host);
 				} else {
 					host = hostMap.get(hostName);
 					host.addAttemptCount();
 				}
 				
-				/**
-				 * Add new resources with bandwidth or update the access times
-				 */
+				/** Add new resources with bandwidth or update the access times */
 				Resource resource;
 				if (!resourceMap.containsKey(resourcePath)) {				
 					int bandWidth;
@@ -99,9 +94,7 @@ public class ProcessLog {
 					resource.addAccessCount();
 				}
 				
-				/**
-				 * Adjust block status and judge if current attempt should be blocked
-				 */
+				/** Adjust block status */
 				if (resourcePath.equals("/login")) {
 					if (lineSplit[lineSplit.length - 2].equals("200")) {
 						host.checkStatus(time, true);
@@ -109,15 +102,15 @@ public class ProcessLog {
 						host.checkStatus(time, false);
 					}
 				}
-				
+				/** log the blocked record */
 				if (host.shouldBlock(time)) {
 					out4.write(line);
 					out4.write("\n");
 				}
 					
 				/**
-				 * Maintain the access count record of recent 60 minutes and update it.
-				 * Maintain the record of top 10 buiest hours which end before 60 minutes.
+				 * Maintain the hourly access count record of start time within 60 minutes and update it.
+				 * Maintain the record of top 10 busiest.
 				 */				
 				while (time.getTime() - hourRecords.getLast().getStartTime().getTime() != 0) {
 					Date last = hourRecords.getLast().getStartTime();
@@ -138,45 +131,37 @@ public class ProcessLog {
 			
 			line = bf.readLine();
 		}
-		
+				
+		/** Out put hosts feature **/
 		outputHosts(hostMap, out);
+		
+		/** Out put hosts feature **/
 		outputResources(resourceMap, out2);
 		
+		/** Add remaining hour records to busiest queue and output the top 10 result **/
 		for (HourRecord record : hourRecords) {
 			addToQueue(buiestRecord, record, 10);
 		}
 		outputBusyHours(buiestRecord, timezone, out3);
 			
-		
-		//System.out.println(hostMap.size());
-		//System.out.println(resourceMap.size());
-
-//		System.out.println(hosts.size());
-//		System.out.println(resources.size());
-		
+		/** Final clean up */
 		bf.close();
 		out.close();
 		out2.close();
 		out3.close();
-		out4.close();
-		
+		out4.close();		
 	}
 	
 	
 	/**
-	 * Add 
-	 * Keep only top 10 busiest record using min heap
-	 * @param pq
-	 * @param record
-	 * @param limit
+	 * Add new generated hour record to busiest queue.
+	 * Keep only top 10 busiest record using min heap (priority queue).
+	 * @param pq 
+	 * @param record 
+	 * @param limit 
 	 * @throws ParseException
 	 */
 	public static void addToQueue(PriorityQueue<HourRecord> pq, HourRecord record, int limit) throws ParseException {
-		Date tmp = format.parse("13/Jul/1995:09:48:56");
-		if(record.getStartTime().getTime() - tmp.getTime() == 0) {
-			System.out.println("test time:" + record.getCount());
-			System.out.println("test peek:" + pq.peek().getCount());
-		}
 		if (pq.size() < limit) {
 			pq.add(record);
 		}else {
@@ -193,8 +178,6 @@ public class ProcessLog {
 		Collections.sort(hosts, Host.Comparators.attempt);
 		
 		for (int i = 0; i < Math.min(hosts.size(), 10); i++) {
-			//System.out.println(hosts.get(i).getHostName());
-			//System.out.println(hosts.get(i).getAttemptCount());
 			out.write(hosts.get(i).getHostName());
 			out.write(",");
 			out.write(Integer.toString(hosts.get(i).getAttemptCount()));
@@ -207,7 +190,6 @@ public class ProcessLog {
 		Collections.sort(resources, Resource.Comparators.consumption);
 		
 		for (int i = 0; i < Math.min(resources.size(), 10); i++) {
-			//System.out.println(resources.get(i).getPath());
 			out.write(resources.get(i).getPath());
 			out.write("\n");
 		}
@@ -218,20 +200,17 @@ public class ProcessLog {
 		List<HourRecord> outputBuiestHours = new ArrayList<>();
 		while(buiestRecord.size() != 0) {
 			HourRecord record = buiestRecord.poll();
-			//System.out.println(record.getCount());	
 			outputBuiestHours.add(record);			
 		}
 		
 		for (int i = outputBuiestHours.size() - 1; i >= 0; i--) {
 			HourRecord record = outputBuiestHours.get(i);
-			//System.out.println(format.format(record.getStartTime()));
 			out.write(format.format(record.getStartTime()).toString());
 			out.write(" " + timezone + ",");
 			out.write(Integer.toString(record.getCount()));
 			if (i != 0) {
 				out.write("\n");
-			}			
-			//System.out.println(record.getCount());			
+			}					
 		}
 	}
 	

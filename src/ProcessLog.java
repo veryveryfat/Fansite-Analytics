@@ -20,7 +20,6 @@ import java.util.PriorityQueue;
  * @author Y.L
  *
  */
-
 public class ProcessLog {
 	private static SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss");
 	
@@ -36,11 +35,14 @@ public class ProcessLog {
 		BufferedWriter out2 = new BufferedWriter(new FileWriter(RESOURCES));
 		BufferedWriter out3 = new BufferedWriter(new FileWriter(HOURS));
 		BufferedWriter out4 = new BufferedWriter(new FileWriter(BLOCKED));
-
-		Map<String, Host> hostMap = new HashMap<>();
-		Map<String, Resource> resourceMap = new HashMap<>();
 		
+		/** Store the hosts info */
+		Map<String, Host> hostMap = new HashMap<>();
+		/** Store the resources info */
+		Map<String, Resource> resourceMap = new HashMap<>();
+		/** Store the hours info of start time within 60 minutes*/
 		LinkedList<HourRecord> hourRecords = new LinkedList<>();
+		/** Min heap for keeping track of current top 10 busiest hours */
 		PriorityQueue<HourRecord> buiestRecord = new PriorityQueue<>();
 		
 		/** Initialize with first record*/
@@ -49,24 +51,21 @@ public class ProcessLog {
 		Date startTime = format.parse(line.split("\\s+")[3].replaceFirst("\\[", ""));
 		hourRecords.add(new HourRecord(startTime));
 		
-		Date currentTime = new Date();
+		int lineCount = 0;
 		
 		/** Process the log line by line*/
 		while(line != null) {
 			try {
 				
-				/**
-				 *  Parse the line of log
-				 */
+				/** Parse the line of log  */
 				String[] lineSplit = line.split("\\s+");
 				String hostName = lineSplit[0];
 				Date time = format.parse(lineSplit[3].replaceFirst("\\[", ""));
 				String resourcePath = lineSplit[6].replace("\"", "");
 				
-				/** Track current processing progress by date*/
-				if (time.getDate() != currentTime.getDate()) {
-					currentTime = time;
-					System.out.println("Now processing to: " + lineSplit[3].replaceFirst("\\[", "").split(":")[0]);
+				/** Track current processing progress*/
+				if (lineCount++ % 200000 == 0) {
+					System.out.println("Now processing to: " + lineSplit[3].replaceFirst("\\[", ""));
 				}
 				
 				/** Add new host or update the attempt times */
@@ -151,6 +150,8 @@ public class ProcessLog {
 		out2.close();
 		out3.close();
 		out4.close();		
+		
+		System.out.println("Done. Processed " + lineCount + " records.");
 	}
 	
 	

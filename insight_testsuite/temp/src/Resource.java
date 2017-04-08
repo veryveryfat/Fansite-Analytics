@@ -1,5 +1,10 @@
 import java.util.Comparator;
 
+/**
+ * Resource information.
+ * @author Y.L
+ *
+ */
 public class Resource {
 	private String path;
 	private int bandWidth;
@@ -12,16 +17,14 @@ public class Resource {
 	}
 	
 	/**
-	 * 
+	 * Add the count of being accessed by one.
 	 */
 	public void addAccessCount() {
 		accessCount++;
 	}
 
 	public static class Comparators {
-		/**
-		 * 
-		 */
+
 		public static Comparator<Resource> consumption = new Comparator<Resource> () {
 			@Override
 			public int compare(Resource o1, Resource o2) {
@@ -35,17 +38,8 @@ public class Resource {
 		};
 	}
 	
+	
 	public String getPath() {
 		return path;
 	}
-
-	public int getBandWidth() {
-		return bandWidth;
-	}
-
-	public int getAccessCount() {
-		return accessCount;
-	}
-	
-
 }

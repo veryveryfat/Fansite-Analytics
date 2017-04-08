@@ -1,11 +1,16 @@
 import java.util.Date;
 
+/**
+ * Hourly record.
+ * @author Y.L
+ *
+ */
 public class HourRecord implements Comparable<HourRecord>{
 	private Date startTime;
 	private int count;
 	
 	/**
-	 * 
+	 * Construct with the start time of this hour.
 	 * @param start
 	 */
 	public HourRecord(Date start) {
@@ -14,7 +19,7 @@ public class HourRecord implements Comparable<HourRecord>{
 	}
 	
 	/**
-	 * 
+	 * Add count of access in this hour.
 	 */
 	public void addCount(){
 		count++;

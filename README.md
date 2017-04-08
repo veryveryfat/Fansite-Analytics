@@ -1,12 +1,12 @@
 # Fansite-Analytics
 
 ## Usage
-To run the program with log_input using script (The output will be in /log_ouput): 
+To run the program with /log_input using script (The output will be in /log_ouput): 
 
     sh run.sh
 
 
-To run the program with java and specific argument: 
+To run the program with java and specific input/output arguments: 
 
     java -cp ./src/classes/ ProcessLog [Input Path] [Output Path for Host Feature] [Output Path for Resource Feature] [Output Path for Hour Feature] [Output Path for Blocked Feature] 
 
