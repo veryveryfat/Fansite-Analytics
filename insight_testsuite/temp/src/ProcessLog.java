@@ -47,6 +47,8 @@ public class ProcessLog {
 		Date startTime = format.parse(line.split("\\s+")[3].replaceFirst("\\[", ""));
 		hourRecords.add(new HourRecord(startTime));
 		
+		Date currentTime = new Date();
+		
 		while(line != null) {
 			try {
 				
@@ -62,7 +64,8 @@ public class ProcessLog {
 	//				System.out.println(lineSplit.length + " " + line);
 	//			}
 				
-				if ((time.getTime() - startTime.getTime()) % (24*60*60*1000) == 0) {
+				if (time.getDate() != currentTime.getDate()) {
+					currentTime = time;
 					System.out.println("Current Process to: " + lineSplit[3].replaceFirst("\\[", ""));
 				}
 				
@@ -145,8 +148,8 @@ public class ProcessLog {
 		outputBusyHours(buiestRecord, timezone, out3);
 			
 		
-		System.out.println(hostMap.size());
-		System.out.println(resourceMap.size());
+		//System.out.println(hostMap.size());
+		//System.out.println(resourceMap.size());
 
 //		System.out.println(hosts.size());
 //		System.out.println(resources.size());
@@ -190,8 +193,8 @@ public class ProcessLog {
 		Collections.sort(hosts, Host.Comparators.attempt);
 		
 		for (int i = 0; i < Math.min(hosts.size(), 10); i++) {
-			System.out.println(hosts.get(i).getHostName());
-			System.out.println(hosts.get(i).getAttemptCount());
+			//System.out.println(hosts.get(i).getHostName());
+			//System.out.println(hosts.get(i).getAttemptCount());
 			out.write(hosts.get(i).getHostName());
 			out.write(",");
 			out.write(Integer.toString(hosts.get(i).getAttemptCount()));
@@ -204,7 +207,7 @@ public class ProcessLog {
 		Collections.sort(resources, Resource.Comparators.consumption);
 		
 		for (int i = 0; i < Math.min(resources.size(), 10); i++) {
-			System.out.println(resources.get(i).getPath());
+			//System.out.println(resources.get(i).getPath());
 			out.write(resources.get(i).getPath());
 			out.write("\n");
 		}
@@ -215,20 +218,20 @@ public class ProcessLog {
 		List<HourRecord> outputBuiestHours = new ArrayList<>();
 		while(buiestRecord.size() != 0) {
 			HourRecord record = buiestRecord.poll();
-			System.out.println(record.getCount());	
+			//System.out.println(record.getCount());	
 			outputBuiestHours.add(record);			
 		}
 		
 		for (int i = outputBuiestHours.size() - 1; i >= 0; i--) {
 			HourRecord record = outputBuiestHours.get(i);
-			System.out.println(format.format(record.getStartTime()));
+			//System.out.println(format.format(record.getStartTime()));
 			out.write(format.format(record.getStartTime()).toString());
 			out.write(" " + timezone + ",");
 			out.write(Integer.toString(record.getCount()));
 			if (i != 0) {
 				out.write("\n");
 			}			
-			System.out.println(record.getCount());			
+			//System.out.println(record.getCount());			
 		}
 	}
 	
