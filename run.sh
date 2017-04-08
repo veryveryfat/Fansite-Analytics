@@ -6,6 +6,6 @@
 # I'll execute my programs, with the input directory log_input and output the files in the directory log_output
 # python ./src/process_log.py ./log_input/log.txt ./log_output/hosts.txt ./log_output/hours.txt ./log_output/resources.txt ./log_output/blocked.txt
 
-javac ./src/*.java
+javac -d ./src/classes  ./src/*.java
 
-java -cp ./src/ ProcessLog ./log_input/log.txt ./log_output/hosts.txt ./log_output/resources.txt ./log_output/hours.txt ./log_output/blocked.txt
+java -cp ./src/classes/ ProcessLog ./log_input/log.txt ./log_output/hosts.txt ./log_output/resources.txt ./log_output/hours.txt ./log_output/blocked.txt
